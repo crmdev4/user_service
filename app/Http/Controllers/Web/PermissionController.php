@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api\Dashboard;
-use App\Http\Controllers\Api as Controller;
-//use \Spatie\Permission\Models\Permission;
-//use \Spatie\Permission\Models\Role;
+namespace App\Http\Controllers\Web;
+
+use App\Http\Controllers\Controller as Controller;
+
 use App\Models\Permission;
 use App\Models\Role;
 use Illuminate\Http\Request;
