@@ -18,14 +18,15 @@ class EndpointRegisterController extends Controller
     private function addServicesToUri($val)
     {
         $segments = explode('/', $val->path);
-
+		$gateway_url	= 'https://api.rentfms.com';
+		
         $index = array_search($val->version, $segments);
         if ($index !== false) {
             array_splice($segments, $index + 1, 0, $val->service_name);
         }
 
         $newUri = implode('/', $segments);
-        $newUris = url('/') . '/' . $newUri;
+        $newUris = $gateway_url . '/' . $newUri;
         return $newUris;
     }
 
