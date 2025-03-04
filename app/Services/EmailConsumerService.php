@@ -16,57 +16,73 @@ class EmailConsumerService
 
     public function __construct()
     {
-        $this->connection = new AMQPStreamConnection(
-            'rabbitmq', // host
-            5672,       // port
-            'guest',    // username
-            'guest'     // password
-        );
-        $this->channel = $this->connection->channel();
+        try {
+            $this->connection = new AMQPStreamConnection(
+                'rabbitmq',
+                5672,
+                'guest',
+                'guest'
+            );
+            $this->channel = $this->connection->channel();
+            Log::info('Successfully connected to RabbitMQ');
+        } catch (\Exception $e) {
+            Log::error('Failed to connect to RabbitMQ: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     public function consume()
     {
-        // Declare queues
-        $this->channel->queue_declare('send_verification_email', false, true, false, false);
-        $this->channel->queue_declare('user_registration', false, true, false, false);
+        try {
+            // Declare queues
+            $this->channel->queue_declare('send_verification_email', false, true, false, false);
+            $this->channel->queue_declare('user_registration', false, true, false, false);
 
-        // Consume verification emails
-        $this->channel->basic_consume(
-            'send_verification_email',
-            '',
-            false,
-            true,
-            false,
-            false,
-            function (AMQPMessage $message) {
-                $data = json_decode($message->getBody(), true);
-                $this->handleVerificationEmail($data);
+            // Consume verification emails
+            $this->channel->basic_consume(
+                'send_verification_email',
+                '',
+                false,
+                true,
+                false,
+                false,
+                function (AMQPMessage $message) {
+                    $data = json_decode($message->getBody(), true);
+                    $this->handleVerificationEmail($data);
+                }
+            );
+
+            // Consume user registration
+            $this->channel->basic_consume(
+                'user_registration',
+                '',
+                false,
+                true,
+                false,
+                false,
+                function (AMQPMessage $message) {
+                    $data = json_decode($message->getBody(), true);
+                    $this->handleUserRegistration($data);
+                }
+            );
+
+            while ($this->channel->is_consuming()) {
+                $this->channel->wait();
             }
-        );
-
-        // Consume user registration
-        $this->channel->basic_consume(
-            'user_registration',
-            '',
-            false,
-            true,
-            false,
-            false,
-            function (AMQPMessage $message) {
-                $data = json_decode($message->getBody(), true);
-                $this->handleUserRegistration($data);
-            }
-        );
-
-        while ($this->channel->is_consuming()) {
-            $this->channel->wait();
+        } catch (\Exception $e) {
+            Log::error('Error in consume method: ' . $e->getMessage());
+            throw $e;
         }
     }
 
     protected function handleVerificationEmail($data)
     {
         try {
+            Log::info('Processing verification email', $data);
+            if (!isset($data['email']) || !isset($data['token'])) {
+                Log::error('Missing required fields in verification data', $data);
+                return;
+            }
             Mail::to($data['email'])->send(new VerificationEmail($data['token']));
             Log::info('Verification email sent successfully', $data);
         } catch (\Exception $e) {
