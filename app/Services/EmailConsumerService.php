@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\RabbitMQ;
+namespace App\Services;
 
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;

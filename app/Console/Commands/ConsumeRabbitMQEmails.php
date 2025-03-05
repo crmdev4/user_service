@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Services\RabbitMQ\EmailConsumerService;
+use App\Services\EmailConsumerService;
 use Illuminate\Support\Facades\Log;
 
 class ConsumeRabbitMQEmails extends Command
