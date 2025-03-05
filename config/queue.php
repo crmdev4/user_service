@@ -75,7 +75,7 @@ return [
         'rabbitmq' => [
             'driver' => 'rabbitmq',
             'queue' => [
-                env('RABBITMQ_QUEUE_LEAD', 'email_verification_lead'),
+                env('RABBITMQ_QUEUE_LEAD', 'send_verification_email'),
                 env('RABBITMQ_QUEUE_DRIVER', 'user_registration'),
             ],
             'hosts' => [
