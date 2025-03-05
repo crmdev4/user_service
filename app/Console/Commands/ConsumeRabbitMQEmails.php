@@ -13,7 +13,7 @@ class ConsumeRabbitMQEmails extends Command
      *
      * @var string
      */
-    protected $signature = 'app:consume-rabbitmq-emalis';
+    protected $signature = 'rabbitmq:consume-emails';
 
     /**
      * The console command description.
