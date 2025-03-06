@@ -30,7 +30,7 @@ class MinioServiceController extends Controller
                 ? config('apiendpoints.PRODUCTION_S3_URL')
                 : config('apiendpoints.DEV_S3_URL');
 
-            $fileUrl = rtrim($baseUrl, '/') . '/hrms/' . $filePath;
+            $fileUrl = rtrim($baseUrl, '/') . '/rentfms/' . $filePath;
 
             // Return success response
             return response()->json([
@@ -97,7 +97,7 @@ class MinioServiceController extends Controller
                 ? config('apiendpoints.PRODUCTION_S3_URL')
                 : config('apiendpoints.DEV_S3_URL');
 
-            $fileUrl = rtrim($baseUrl, '/') . '/hrms/' . $filePath;
+            $fileUrl = rtrim($baseUrl, '/') . '/rentfms/' . $filePath;
 
             // Return success response
             return response()->json([
@@ -124,21 +124,21 @@ class MinioServiceController extends Controller
             $environment = app()->environment();
 
             if ($environment === 'production') {
-                $baseUrl = config('apiendpoints.PRODUCTION_S3_URL') . '/hrms/';
+                $baseUrl = config('apiendpoints.PRODUCTION_S3_URL') . '/rentfms/';
             } else {
-                $baseUrl = config('apiendpoints.DEV_S3_URL') . '/hrms/';
+                $baseUrl = config('apiendpoints.DEV_S3_URL') . '/rentfms/';
             }
 
             // Determine the environment and base URL
 
             $baseUrl = $environment === 'production'
-                ? config('apiendpoints.PRODUCTION_S3_URL') . '/hrms/'
-                : config('apiendpoints.DEV_S3_URL') . '/hrms/';
+                ? config('apiendpoints.PRODUCTION_S3_URL') . '/rentfms/'
+                : config('apiendpoints.DEV_S3_URL') . '/rentfms/';
 
             // Extract file path from the provided filename
             $filePath = str_replace($baseUrl, '', $request->filename);
 
-            //$baseUrl = 'https://devapis3.hrms.duluin.com/hrms';
+            //$baseUrl = 'https://devapis3.rentfms.duluin.com/rentfms';
 
 
             $disk = Storage::disk('minio');
@@ -231,7 +231,7 @@ class MinioServiceController extends Controller
                 ? config('apiendpoints.PRODUCTION_S3_URL')
                 : config('apiendpoints.DEV_S3_URL');
 
-            $fileUrl = rtrim($baseUrl, '/') . '/hrms/' . $folder . '/' . $fileName;
+            $fileUrl = rtrim($baseUrl, '/') . '/rentfms/' . $folder . '/' . $fileName;
 
             // Return success response
             return response()->json([
