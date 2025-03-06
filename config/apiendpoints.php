@@ -15,6 +15,6 @@ return [
 
     'LOCAL_API_NOTIFICATION' => env('LOCAL_API_NOTIFICATION', 'http://nginx_notifications_services:80'),
 
-    'DEV_S3_URL' => env('DEV_S3_URL', 'https://devapis3.renfms.com'),
-    'PRODUCTION_S3_URL' => env('PRODUCTION_S3_URL', 'https://apis3.renfms.com'),
+    'DEV_S3_URL' => env('DEV_S3_URL', 'https://apis3.rentfms.com'),
+    'PRODUCTION_S3_URL' => env('PRODUCTION_S3_URL', 'https://apis3.rentfms.com'),
 ];
