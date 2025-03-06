@@ -15,10 +15,12 @@
         "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "^3.28",
         "maatwebsite/excel": "^3.1",
+        "php-amqplib/php-amqplib": "^3.7",
         "predis/predis": "^2.0",
         "spatie/laravel-activitylog": "^4.8",
         "spatie/laravel-permission": "^6.9",
         "spiral/roadrunner": "^2024.3",
+        "vladimir-yuldashev/laravel-queue-rabbitmq": "^14.1",
         "spiral/roadrunner-cli": "^2.7",
         "yajra/laravel-datatables": "11.0"
     },
