@@ -138,8 +138,6 @@ class MinioServiceController extends Controller
             // Extract file path from the provided filename
             $filePath = str_replace($baseUrl, '', $request->filename);
 
-            //$baseUrl = 'https://devapis3.rentfms.duluin.com/rentfms';
-
 
             $disk = Storage::disk('minio');
             if ($disk->exists($filePath)) {
