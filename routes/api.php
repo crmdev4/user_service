@@ -46,8 +46,6 @@ Route::post('/file_uploader', [MinioServiceController::class, 'fileUploader']);
 Route::post('/file_uploader_new', [MinioServiceController::class, 'fileUploaderNew']);
 Route::post('/file_blob_uploader', [MinioServiceController::class, 'handleBlobUpload']);
 Route::post('/file_delete', [MinioServiceController::class, 'fileDelete']);
-Route::post('/employees/import', [EmployeeImportController::class, 'importEmployees']);
-Route::get('/employees/import/progress/{importKey}', [EmployeeImportController::class, 'getImportProgress']);
 
 // get user by driver_id
 Route::prefix('user')->group(function () {
@@ -74,6 +72,9 @@ Route::middleware('auth:api')->group(function () {
         Route::patch('/banned/{id}', [UserController::class, 'banned']);
         Route::get('/banned/user_info/{id}', [UserController::class, 'getUserBannedInfo']);
     });
+
+    Route::post('/employees/import', [EmployeeImportController::class, 'importEmployees']);
+    Route::get('/employees/import/progress/{importKey}', [EmployeeImportController::class, 'getImportProgress']);
 
     Route::post('/change_password', [AuthController::class, 'change_password']);
     Route::post('/reset_password', [AuthController::class, 'resetPassword']);
