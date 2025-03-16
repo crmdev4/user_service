@@ -42,6 +42,7 @@ class ImportEmployeesJob implements ShouldQueue
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
             ])->post($apiUrl, $employee);
+            \Log::info($response->body());
 
             if ($response->failed()) {
                 Log::error('Failed to send employee data: ' . $response->body());
