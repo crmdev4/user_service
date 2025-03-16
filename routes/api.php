@@ -11,6 +11,8 @@ use App\Http\Controllers\API\User\UserController;
 use App\Http\Controllers\API\MinioServiceController;
 use App\Http\Controllers\API\Auth\ValidateClientController;
 use App\Http\Controllers\API\EmployeeImportController;
+use App\Jobs\ProcessRabbitMQMessage;
+use App\Jobs\SendWelcomeEmail;
 
 Route::post('/validate-client', [ValidateClientController::class, 'validateClient']);
 Route::get('/validate-token', function () {
@@ -26,6 +28,13 @@ Route::get('/validate-token', function () {
             'message' => 'Invalid or expired token.',
         ], 401); // Use a 401 status code for unauthorized access
     }
+});
+
+// test rabbitMq
+Route::get('/send-message', function () {
+    //ProcessRabbitMQMessage::dispatch();
+    SendWelcomeEmail::dispatch();
+    return 'Message sent to RabbitMQ!';
 });
 
 Route::post('/login', [AuthController::class, 'login']);
