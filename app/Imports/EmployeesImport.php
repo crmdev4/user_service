@@ -26,6 +26,15 @@ class EmployeesImport implements ToCollection
     {
         $dataWithoutHeader = $collection->slice(3);
         $mappedData = $dataWithoutHeader->map(function ($row) {
+            \Log::info("Sending data : ");
+            \Log::info(json_encode([
+                'first_name' => strtolower($row[0]),
+                'last_name' => strtolower($row[1]),
+                'phone_number' => str_replace(["'", ' '], '', (string)$row[2]),
+                'whatsapp_number' => str_replace(["'", ' '], '', (string)$row[3]),
+                'email' => strtolower($row[4]),
+                'company_id' => $this->account->secondary_id,
+            ]));
             return [
                 'first_name' => strtolower($row[0]),
                 'last_name' => strtolower($row[1]),
