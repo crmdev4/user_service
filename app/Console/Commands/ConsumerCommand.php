@@ -58,7 +58,8 @@ class ConsumerCommand extends Command
 
                                 $verificationUrl = 'http://api.rentfms.test/api/verify?token='. $token;
 
-                                SendEmployeeVerificationEmailJob::dispatch($data, $verificationUrl);
+                                /* SendEmployeeVerificationEmailJob::dispatch($data, $verificationUrl); */
+                                Mail::to($data['email'])->send(new VerificationEmail($token, $verificationUrl, $data));
 
                                 Log::info(" [x] Verification email sent to: " . $data['email']);
                                 $this->info(" [x] Verification email sent to: " . $data['email']);
