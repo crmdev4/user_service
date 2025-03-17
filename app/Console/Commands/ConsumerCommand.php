@@ -3,65 +3,77 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
+use App\Mail\VerificationEmail;
+use App\Mail\WelcomeEmail;
 
 class ConsumerCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'rabbitmq:consumer';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'RabbitMQ Consumer';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
-        $connection = new AMQPStreamConnection('rabbitmq', 5672, 'guest', 'guest');
-        $channel = $connection->channel();
+        try {
+            $connection = new AMQPStreamConnection('rabbitmq', 5672, 'guest', 'guest');
+            $channel = $connection->channel();
 
-        $channel->queue_declare(
-            'default',
-            false,
-            true,
-            false,
-            false
-        );
+            $channel->queue_declare(
+                'default',
+                false,
+                true,
+                false,
+                false
+            );
 
-        echo " [*] Waiting for messages. To exit press CTRL+C\n";
+            $this->info(" [*] Waiting for messages. To exit press CTRL+C");
 
-        $callback = function ($msg) {
-            echo ' [x] Received ', $msg->body, "\n";
-            $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-        };
+            $callback = function ($msg) {
+                try {
+                    $data = json_decode($msg->body, true);
+                    $this->info(" [x] Received message: " . $msg->body);
 
+                    if (isset($data['type'])) {
+                        switch ($data['type']) {
+                            case 'verification':
+                                Mail::to($data['email'])->send(new VerificationEmail($data['token']));
+                                $this->info(" [x] Verification email sent to: " . $data['email']);
+                                break;
+                            case 'registration':
+                                Mail::to($data['email'])->send(new WelcomeEmail($data));
+                                $this->info(" [x] Welcome email sent to: " . $data['email']);
+                                break;
+                            default:
+                                $this->warn(" [x] Unknown message type: " . $data['type']);
+                        }
+                    }
 
-        $channel->basic_qos(null, 1, null);
+                    $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
 
-        $channel->basic_consume(
-            'default',
-            '',
-            false,
-            false,
-            false,
-            false,
-            $callback
-        );
+                } catch (\Exception $e) {
+                    Log::error('Failed to process message: ' . $e->getMessage());
+                    $this->error(" [x] Error: " . $e->getMessage());
+                    $msg->delivery_info['channel']->basic_reject($msg->delivery_info['delivery_tag'], false);
+                }
+            };
 
-        while ($channel->is_consuming()) {
-            $channel->wait();
+            $channel->basic_qos(null, 1, null);
+            $channel->basic_consume('default', '', false, false, false, false, $callback);
+
+            while ($channel->is_consuming()) {
+                $channel->wait();
+            }
+
+            $channel->close();
+            $connection->close();
+
+        } catch (\Exception $e) {
+            Log::error('Consumer error: ' . $e->getMessage());
+            $this->error(" [x] Consumer error: " . $e->getMessage());
+            return Command::FAILURE;
         }
-
-        $channel->close();
 
         return Command::SUCCESS;
     }
