@@ -37,7 +37,7 @@ class ImportEmployeesJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $apiUrl = 'http://localhost:3001/api/v1/leads/';
+        $apiUrl = 'http://service_driver:3001/api/v1/leads/';
         foreach ($this->employeesBatch as $employee) {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
