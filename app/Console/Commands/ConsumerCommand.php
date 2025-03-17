@@ -46,12 +46,12 @@ class ConsumerCommand extends Command
                                 // dispatch job
 
                                 // create token with hash sha256 from "id":"21b02abb-7d9c-4597-bb9c-07ff7e20ff8b","CompanyId":"34324-4dasfkf-2314-dsar5353"
-                                $token = hash('sha256', $data['id'] . $data['CompanyId']);
+                                $token = hash('sha256', $data['id'] . $data['company_id']);
 
                                 // store to EmailUserVerification table
                                 $verification = EmailVerification::create([
                                     'employee_id' => $data['id'],
-                                    'company_id' => $data['CompanyId'],
+                                    'company_id' => $data['company_id'],
                                     'token' => $token,
                                     'expired_at' => Carbon::now()->addDay(1),
                                 ]);
