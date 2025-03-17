@@ -33,8 +33,8 @@ Route::get('/validate-token', function () {
 // test rabbitMq
 Route::get('/send-message', function () {
     //ProcessRabbitMQMessage::dispatch();
-    SendWelcomeEmail::dispatch();
-    return 'Message sent to RabbitMQ!';
+    // SendWelcomeEmail::dispatch();
+    // return 'Message sent to RabbitMQ!';
 });
 
 Route::post('/login', [AuthController::class, 'login']);
