@@ -36,7 +36,7 @@ class SendEmployeeVerificationEmailJob implements ShouldQueue
     public function handle()
     {
         // Send the email
-        Mail::to($this->employee['personal_email'])->send(
+        Mail::to($this->employee['email'])->send(
             new employeeRegistrationVerificationMail($this->verificationUrl, $this->employee)
         );
     }

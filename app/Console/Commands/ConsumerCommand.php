@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Mail;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use App\Mail\VerificationEmail;
 use App\Mail\WelcomeEmail;
+use App\Jobs\SendEmployeeVerificationEmailJob;
+use App\Models\EmailUserVerification;
+use App\Models\EmailVerification;
+use Carbon\Carbon;
 
 class ConsumerCommand extends Command
 {
@@ -38,11 +42,30 @@ class ConsumerCommand extends Command
                     if (isset($data['type'])) {
                         switch ($data['type']) {
                             case 'verification':
-                                Mail::to($data['email'])->send(new VerificationEmail($data['token']));
+                                // Mail::to($data['email'])->send(new VerificationEmail($data['token']));
+                                // dispatch job
+
+                                // create token with hash sha256 from "id":"21b02abb-7d9c-4597-bb9c-07ff7e20ff8b","CompanyId":"34324-4dasfkf-2314-dsar5353"
+                                $token = hash('sha256', $data['id'] . $data['CompanyId']);
+
+                                // store to EmailUserVerification table
+                                $verification = EmailVerification::create([
+                                    'employee_id' => $data['id'],
+                                    'company_id' => $data['CompanyId'],
+                                    'token' => $token,
+                                    'expired_at' => Carbon::now()->addDay(1),
+                                ]);
+
+                                $verificationUrl = 'http://api.rentfms.test/api/verify?token='. $token;
+
+                                SendEmployeeVerificationEmailJob::dispatch($data, $verificationUrl);
+
+                                Log::info(" [x] Verification email sent to: " . $data['email']);
                                 $this->info(" [x] Verification email sent to: " . $data['email']);
                                 break;
                             case 'registration':
                                 Mail::to($data['email'])->send(new WelcomeEmail($data));
+                                Log::info(" [x] Welcome email sent to: " . $data['email']);
                                 $this->info(" [x] Welcome email sent to: " . $data['email']);
                                 break;
                             default:
