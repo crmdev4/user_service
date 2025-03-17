@@ -8,6 +8,7 @@ use App\Jobs\ImportEmployeesJob;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToCollection;
+use Illuminate\Support\Facades\Log;
 
 class EmployeesImport implements ToCollection
 {
@@ -26,8 +27,8 @@ class EmployeesImport implements ToCollection
     {
         $dataWithoutHeader = $collection->slice(3);
         $mappedData = $dataWithoutHeader->map(function ($row) {
-            \Log::info("Sending data : ");
-            \Log::info(json_encode([
+            Log::info("Sending data : ");
+            Log::info(json_encode([
                 'first_name' => strtolower($row[0]),
                 'last_name' => strtolower($row[1]),
                 'phone_number' => str_replace(["'", ' '], '', (string)$row[2]),
