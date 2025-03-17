@@ -49,7 +49,7 @@ class EmployeesImport implements ToCollection
         $batches = $mappedData->chunk(50);
         $totalBatches = $batches->count();
         foreach ($batches as $batchNumber => $batch) {
-            // ImportEmployeesJob::dispatch($batch->toArray(), $batchNumber + 1, $totalBatches, $this->importKey);
+            ImportEmployeesJob::dispatch($batch->toArray(), $batchNumber + 1, $totalBatches, $this->importKey);
         }
     }
 }
