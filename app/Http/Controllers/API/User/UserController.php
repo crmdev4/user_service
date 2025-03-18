@@ -30,51 +30,66 @@ class UserController extends Controller
         return $this->service->allData($request->all());
     }
 
-    public function datatables(Request $request)
+    public function users(Request $request)
     {
-
-        $draw = $request->input('draw');
+        
+        // Get input values with defaults
+        $page = (int) $request->input('_page', 1);
+        $limit = (int) $request->input('_limit', 5);
+        $sort = $request->input('_sort', 'id');
+        $order = $request->input('_order', 'asc');
         $company_id = $request->input('company_id');
-        $offset = $request->input('start');
-        if ($offset == '') {
-            $offset = 0;
-        }
-        ;
-        $limit = $request->input('length');
-        if ($limit == '') {
-            $limit = 25;
-        }
-        ;
         $search = $request->input('search')['value'] ?? '';
-        $order = $request->input('order')[0]['column'] ?? '';
-        $sort = $request->input('order')[0]['dir'] ?? 'DESC';
-        $columns = $request->input('columns')[$order]['data'] ?? 'user_accounts.created_at';
 
-        $query = UserAccount::query();
+        // Calculate offset
+        $offset = ($page - 1) * $limit;
 
-        $query = $query->leftJoin('users', 'user_accounts.user_id', '=', 'users.id');
-        $query = $query->where('user_accounts.secondary_id', $company_id);
-        $query = $query->whereNotNull('user_accounts.host');
-        if ($search != '') {
-            $query = $query->where('users.name', 'like', '%' . $search . '%');
+        // Base query
+        $query = UserAccount::select(
+                            'user_accounts.secondary_id as secondary_id',
+                            'user_accounts.id as id',
+                            'user_accounts.user_id',
+                            'user_accounts.account_id',
+                            'user_accounts.host',
+
+                            'accounts.account',
+
+                            'users.id as user_id',
+                            'users.name',
+                            'users.phone',
+                            'users.email'
+                        )
+                        ->leftJoin('accounts', 'user_accounts.account_id', '=', 'accounts.id')
+                        ->leftJoin('users', 'user_accounts.user_id', '=', 'users.id');
+
+        $query = $query->where('user_accounts.secondary_id', $company_id)
+            ->whereNotNull('user_accounts.host');
+
+        // Apply search
+        if (!empty($search)) {
+            $query->where('users.name', 'like', '%' . $search . '%');
         }
 
-        $query = $query->orderBy($columns, $sort);
-        $query = $query->offset($offset);
-        $query = $query->limit($limit);
-        $count = $query->count();
-        $query = $query->get();
+        // Get total records count (before pagination)
+        $total = $query->count();
 
-        foreach ($query as $key => $val) {
-            $query[$key]     = $val;
-            $query[$key]['role']    = User::find($val->id)->getRoleNames()->first();
+        // Apply sorting & pagination
+        $users = $query->orderBy('user_accounts.'.$sort, $order)
+            ->offset($offset)
+            ->limit($limit)
+            ->get();
+
+        // Append roles to each user
+        foreach ($users as $user) {
+            $user->role = User::find($user->user_id)->getRoleNames()->first();
         }
 
-        $result['success'] = true;
-        $result['draw'] = $draw;
-        $result['recordsTotal'] = $count;
-        $result['recordsFiltered'] = $count;
-        $result['data'] = $query;
+        $result['data'] = $users;
+        $result['meta'] = [
+            'total' => $total,
+            'page' => $page,
+            'pageSize' => $limit
+        ];
 
         return response()->json($result, 200);
     }

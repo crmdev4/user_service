@@ -112,6 +112,72 @@ class AuthController extends BaseController
         }
     }
 
+    public function registerDriver(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string',
+            'password' => 'required|string',
+            'phone' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->failedResponse(null, json_encode($validator->errors()), 400, json_encode($validator->errors()));
+        }
+        
+        $accountType = "fms_driver";
+
+        $account = Account::where('account', $accountType)->first();
+
+        $user = User::where('email', $request->email)->orWhere('phone', $request->phone)->first();
+
+        if ($user) {
+            $checkAccount = $this->checkAccount($user, $accountType);
+            //dd($checkAccount);
+            if ($checkAccount == true) {
+                return $this->failedResponse(null, 'Akun sudah terdaftar silahkan login', 303);
+            }
+
+            return $this->successResponse(['status' => 302, 'data' => $user], 'User already register, please activate account', 302);
+            
+        }
+
+        DB::beginTransaction();
+        try {
+
+            $user = User::create([
+                'name' => $request->full_name,
+                'email' => $request->email,
+                'username' => $request->email,
+                'password' => Hash::make($request->password),
+                'phone' => $request->phone,
+                'is_active' => 1,
+                'banned' => 0,
+                'last_login' => now(),
+            ]);
+
+            // activity('Register User')
+            //     ->causedBy($user)
+            //     ->performedOn($user)
+            //     ->log('Register User');
+
+            $registerAccount = $this->registerAccount($user, $account, $request);
+
+            DB::commit();
+            return $this->successResponse(
+                [
+                    'user' => $user,
+                    'account' => $registerAccount
+                ],
+                'User register success, signin and enjoy your account.',
+                201
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return $this->failedResponse(null, $e->getMessage(), 203);
+        }
+    }
+
     public function activate_account(Request $request)
     {
         $request->validate([

@@ -37,6 +37,7 @@ Route::post('/resend_verification_email', [UserVerificationController::class, 'r
 
 Route::prefix('register')->group(callback: function () {
     Route::post('/', [AuthController::class, 'register']);
+    Route::post('/driver', [AuthController::class, 'registerDriver']);
     Route::post('/activate_account', [AuthController::class, 'activate_account']);
     Route::post('/set_secondary_id', [AuthController::class, 'set_secondary_id']);
 });
@@ -61,11 +62,11 @@ Route::middleware('auth:api')->group(function () {
     
     Route::post('logout', [AuthController::class, 'logout']);
     Route::prefix('user')->group(function () {
-        Route::get('/', [AuthController::class, 'user']);
+        Route::get('/', [UserController::class, 'users']);
         Route::post('/', [AuthController::class, 'update']);
         
         Route::post('/create', [UserController::class, 'create']);
-        Route::post('/datatables', [UserController::class, 'datatables']);
+        Route::get('/list', [UserController::class, 'users']);
         Route::get('/{id}', [UserController::class, 'show']);
         Route::patch('/{id}', [UserController::class, 'update']);
         Route::patch('/banned/{id}', [UserController::class, 'banned']);
