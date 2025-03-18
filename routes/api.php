@@ -10,6 +10,9 @@ use App\Http\Controllers\API\Auth\PermissionController;
 use App\Http\Controllers\API\User\UserController;
 use App\Http\Controllers\API\MinioServiceController;
 use App\Http\Controllers\API\Auth\ValidateClientController;
+use App\Http\Controllers\API\EmployeeImportController;
+use App\Jobs\ProcessRabbitMQMessage;
+use App\Jobs\SendWelcomeEmail;
 
 Route::post('/validate-client', [ValidateClientController::class, 'validateClient']);
 Route::get('/validate-token', function () {
@@ -25,6 +28,13 @@ Route::get('/validate-token', function () {
             'message' => 'Invalid or expired token.',
         ], 401); // Use a 401 status code for unauthorized access
     }
+});
+
+// test rabbitMq
+Route::get('/send-message', function () {
+    //ProcessRabbitMQMessage::dispatch();
+    // SendWelcomeEmail::dispatch();
+    // return 'Message sent to RabbitMQ!';
 });
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -57,14 +67,14 @@ Route::prefix('user')->group(function () {
 
 Route::middleware('auth:api')->group(function () {
     Route::get('/', function () {
-        return Auth::guard('api')->check();; 
+        return Auth::guard('api')->check();;
     });
-    
+
     Route::post('logout', [AuthController::class, 'logout']);
     Route::prefix('user')->group(function () {
         Route::get('/', [UserController::class, 'users']);
         Route::post('/', [AuthController::class, 'update']);
-        
+
         Route::post('/create', [UserController::class, 'create']);
         Route::get('/list', [UserController::class, 'users']);
         Route::get('/{id}', [UserController::class, 'show']);
@@ -72,7 +82,10 @@ Route::middleware('auth:api')->group(function () {
         Route::patch('/banned/{id}', [UserController::class, 'banned']);
         Route::get('/banned/user_info/{id}', [UserController::class, 'getUserBannedInfo']);
     });
-    
+
+    Route::post('/employees/import', [EmployeeImportController::class, 'importEmployees']);
+    Route::get('/employees/import/progress/{importKey}', [EmployeeImportController::class, 'getImportProgress']);
+
     Route::post('/change_password', [AuthController::class, 'change_password']);
     Route::post('/reset_password', [AuthController::class, 'resetPassword']);
 
@@ -102,5 +115,5 @@ Route::middleware('auth:api')->group(function () {
             Route::post('/remove', 'removePermissionFromRole');
         });
     });
- 
+
 });

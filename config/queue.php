@@ -74,27 +74,25 @@ return [
 
         'rabbitmq' => [
             'driver' => 'rabbitmq',
-            'queue' => [
-                env('RABBITMQ_QUEUE_LEAD', 'send_verification_email'),
-                env('RABBITMQ_QUEUE_DRIVER', 'user_registration'),
-            ],
             'hosts' => [
                 [
-                    'host' => env('RABBITMQ_HOST', 'rabbitmq'),
+                    'host' => env('RABBITMQ_HOST', '127.0.0.1'),
                     'port' => env('RABBITMQ_PORT', 5672),
                     'user' => env('RABBITMQ_USER', 'guest'),
                     'password' => env('RABBITMQ_PASSWORD', 'guest'),
                     'vhost' => env('RABBITMQ_VHOST', '/'),
                 ],
             ],
+            'queue' => env('RABBITMQ_QUEUE', 'default'),
             'options' => [
-                'queue' => [
-                    'exchange' => env('RABBITMQ_EXCHANGE_NAME', 'default'),
-                    'exchange_type' => env('RABBITMQ_EXCHANGE_TYPE', 'direct'),
-                    'exchange_routing_key' => env('RABBITMQ_ROUTING_KEY', 'default'),
+                'exchange' => [
+                    'name' => env('RABBITMQ_EXCHANGE_NAME', 'default'),
+                    'type' => env('RABBITMQ_EXCHANGE_TYPE', 'direct'),
+                    'durable' => env('RABBITMQ_EXCHANGE_DURABLE', true),
                 ],
             ],
         ],
+
     ],
 
     /*

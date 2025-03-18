@@ -7,8 +7,10 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeEmail;
 
-class SendExpenseClaimApprovalEmailJob implements ShouldQueue
+class SendWelcomeEmail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -25,6 +27,6 @@ class SendExpenseClaimApprovalEmailJob implements ShouldQueue
      */
     public function handle(): void
     {
-        //
+        Mail::raw('Hello World!', function($msg) {$msg->to('aswansetiawan01@gmail.com')->subject('Test Email'); });
     }
 }
