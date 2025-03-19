@@ -7,6 +7,7 @@ use App\Models\EmailUserVerification;
 use App\Models\EmailVerification;
 use App\Models\UserAccount;
 use App\Traits\ApiResponseTrait;
+use App\Helpers\RabbitMq;
 use Cache;
 use Carbon\Carbon;
 use Http;
@@ -254,6 +255,16 @@ class UserVerificationController extends Controller
             } else {
                 // change leads status in leads service through rabbitMq
                 \Log::info("Verification token: " . $token);
+                \Log::info("Verification Data : " . json_encode($verification));
+
+                // send to message broker (RabbitMQ, PORT:5672)
+                $data = [
+                    'type' => 'DRIVER_ACTIVATION',
+                    'lead_id' => $verification->employee_id,
+                    'company_id' => $verification->company_id,
+                ];
+
+                RabbitMq::sendToRabbitMq(json_encode($data), 'default');
             }
         }
         // return redirect()->to(config('app.frontend_url') . '/verify-email?status=error&message=Token not found');
