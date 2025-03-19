@@ -279,6 +279,9 @@ class AuthController extends BaseController
             $query = new UserAccount;
             $query->user_id = $user->id;
             $query->account_id = $account->id;
+            if ($request->secondary_id) {
+                $query->secondary_id = $request->secondary_id;
+            }
             if ($request->host) {
                 $query->host = $host;
                 // $query->host = $request->host;
