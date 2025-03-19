@@ -15,9 +15,8 @@ Route::prefix('/dashboard/relay')->group(function () {
     Route::get('/relation/{id}', [RelayController::class, 'getRelation']);
 });
 
-// Route::get('/verify-email', [EmployeeVerificationController::class, 'verify'])->name('verify.email');
-Route::get('/verify-email/{token}', [UserVerificationController::class, 'verify']);
-// Route::get('/verify-email/{token}', [EmployeeVerificationController::class, 'verifyToken'])->name('verify.email.token');
+Route::get('/verify-email', [EmployeeVerificationController::class, 'verify'])->name('verify.email');
+Route::get('/verify-email/{token}', [EmployeeVerificationController::class, 'verifyToken'])->name('verify.email.token');
 
 Route::get('/forgot-password/{token}', [EmailForgotPasswordController::class, 'verify'])->name('verify.email-forgot-password');
 Route::get('/verify-user-email', [UserVerificationController::class, 'verifyUser'])->name('verify.user.email');

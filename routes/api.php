@@ -45,6 +45,7 @@ Route::post('/recovery_password', [EmailForgotPasswordController::class, 'recove
 
 Route::post('/verification-email-user', [UserVerificationController::class, 'verifyUser']);
 Route::post('/resend_verification_email', [UserVerificationController::class, 'resendVerificationEmail']);
+Route::get('/verify-email/{token}', [UserVerificationController::class, 'verify']);
 
 Route::prefix('register')->group(callback: function () {
     Route::post('/', [AuthController::class, 'register']);
