@@ -240,4 +240,20 @@ class UserVerificationController extends Controller
             );
         }
     }
+
+    // verify token received from email
+    public function verify(Request $request, $token)
+    {
+        $verification = EmailVerification::where('token', $token)->first();
+
+        if ($verification) {
+            if ($verification->expired_at < Carbon::now()) {
+                return redirect()->to(config('app.frontend_url') . '/verify-email?status=error&message=Token has expired');
+            } else {
+                // change leads status in leads service through rabbitMq
+                \Log::info("Verification token: " . $token);
+            }
+        }
+        // return redirect()->to(config('app.frontend_url') . '/verify-email?status=error&message=Token not found');
+    }
 }

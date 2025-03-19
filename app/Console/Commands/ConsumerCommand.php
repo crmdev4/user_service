@@ -56,7 +56,7 @@ class ConsumerCommand extends Command
                                     'expired_at' => Carbon::now()->addDay(1),
                                 ]);
 
-                                $verificationUrl = 'http://auth.rentfms.test/api/users/verification-email-user?token=' . $token;
+                                $verificationUrl = env('API_AUTH_URL') . '/users/verify-email/' . $token;
 
                                 /* SendEmployeeVerificationEmailJob::dispatch($data, $verificationUrl); */
                                 Mail::to($data['email'])->send(new VerificationEmail($token, $verificationUrl, $data));

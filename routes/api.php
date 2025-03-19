@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\EmailForgotPasswordController;
 use App\Http\Controllers\API\UserVerificationController;
@@ -44,6 +45,7 @@ Route::post('/recovery_password', [EmailForgotPasswordController::class, 'recove
 
 Route::post('/verification-email-user', [UserVerificationController::class, 'verifyUser']);
 Route::post('/resend_verification_email', [UserVerificationController::class, 'resendVerificationEmail']);
+Route::get('/verify-email/{token}', [UserVerificationController::class, 'verify']);
 
 Route::prefix('register')->group(callback: function () {
     Route::post('/', [AuthController::class, 'register']);
@@ -115,5 +117,4 @@ Route::middleware('auth:api')->group(function () {
             Route::post('/remove', 'removePermissionFromRole');
         });
     });
-
 });
