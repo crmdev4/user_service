@@ -56,7 +56,7 @@ class ConsumerCommand extends Command
                                     'expired_at' => Carbon::now()->addDay(1),
                                 ]);
 
-                                $verificationUrl = 'http://api.rentfms.test/api/verify?token='. $token;
+                                $verificationUrl = 'http://auth.rentfms.test/api/users/verification-email-user?token=' . $token;
 
                                 /* SendEmployeeVerificationEmailJob::dispatch($data, $verificationUrl); */
                                 Mail::to($data['email'])->send(new VerificationEmail($token, $verificationUrl, $data));
@@ -75,7 +75,6 @@ class ConsumerCommand extends Command
                     }
 
                     $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-
                 } catch (\Exception $e) {
                     Log::error('Failed to process message: ' . $e->getMessage());
                     $this->error(" [x] Error: " . $e->getMessage());
@@ -92,7 +91,6 @@ class ConsumerCommand extends Command
 
             $channel->close();
             $connection->close();
-
         } catch (\Exception $e) {
             Log::error('Consumer error: ' . $e->getMessage());
             $this->error(" [x] Consumer error: " . $e->getMessage());
