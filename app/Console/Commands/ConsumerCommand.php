@@ -56,7 +56,8 @@ class ConsumerCommand extends Command
                                     'expired_at' => Carbon::now()->addDay(1),
                                 ]);
 
-                                $verificationUrl = env('API_AUTH_URL') . '/verify-email/' . $token;
+                                $verificationUrl = config('apiendpoints.AUTH_API_URL') . '/verify-email/' . $token;
+                                \Log::info("Endpoint URL for Email : " . $verificationUrl);
 
                                 /* SendEmployeeVerificationEmailJob::dispatch($data, $verificationUrl); */
                                 Mail::to($data['email'])->send(new VerificationEmail($token, $verificationUrl, $data));
