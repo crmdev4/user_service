@@ -259,10 +259,11 @@ class UserVerificationController extends Controller
 
                 // send to message broker (RabbitMQ, PORT:5672)
                 $data = [
-                    'type' => 'DRIVER_ACTIVATION',
+                    'type' => 'registration',
                     'lead_id' => $verification->employee_id,
                     'company_id' => $verification->company_id,
                 ];
+                \Log::info("Data to send to RabbitMQ : " . json_encode($data));
 
                 RabbitMq::sendToRabbitMq(json_encode($data), 'default');
             }
