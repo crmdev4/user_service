@@ -66,9 +66,9 @@ class ConsumerCommand extends Command
                                 $this->info(" [x] Verification email sent to: " . $data['email']);
                                 break;
                             case 'registration':
-                                Mail::to($data['email'])->send(new WelcomeEmail($data));
-                                Log::info(" [x] Welcome email sent to: " . $data['email']);
-                                $this->info(" [x] Welcome email sent to: " . $data['email']);
+                                // Mail::to($data['email'])->send(new WelcomeEmail($data));
+                                Log::info(" [x] Welcome email sent");
+                                $this->info(" [x] Welcome email sent");
                                 break;
                             default:
                                 $this->warn(" [x] Unknown message type: " . $data['type']);
