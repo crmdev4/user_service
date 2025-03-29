@@ -251,7 +251,7 @@ class UserVerificationController extends Controller
             if ($verification->expired_at < Carbon::now()) {
                 \Log::info("Verification token: " . $token);
                 \Log::info("Token has expired");
-                // return redirect()->to(config('app.frontend_url') . '/verify-email?status=error&message=Token has expired');
+                return redirect()->to(config('app.frontend_url') . '/verify-email?status=error&message=Token has expired');
             } else {
                 // change leads status in leads service through rabbitMq
                 \Log::info("Verification token: " . $token);
@@ -266,8 +266,11 @@ class UserVerificationController extends Controller
                 \Log::info("Data to send to RabbitMQ : " . json_encode($data));
 
                 RabbitMq::sendToRabbitMq(json_encode($data), 'default');
+
+                // delete token
+                $verification->delete();
+                return redirect()->to(config('app.frontend_url') . '/auth/signup');
             }
         }
-        // return redirect()->to(config('app.frontend_url') . '/verify-email?status=error&message=Token not found');
     }
 }
