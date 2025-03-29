@@ -265,7 +265,7 @@ class UserVerificationController extends Controller
                 ];
                 \Log::info("Data to send to RabbitMQ : " . json_encode($data));
 
-                RabbitMq::sendToRabbitMq(json_encode($data), 'default');
+                RabbitMq::sendToRabbitMq(json_encode($data), 'user_registration');
 
                 // delete token
                 $verification->delete();
