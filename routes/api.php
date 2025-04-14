@@ -72,7 +72,8 @@ Route::middleware('auth:api')->group(function () {
 
     Route::post('logout', [AuthController::class, 'logout']);
     Route::prefix('user')->group(function () {
-        Route::get('/', [UserController::class, 'users']);
+        Route::get('/', [AuthController::class, 'user']);
+       // Route::get('/', [UserController::class, 'users']);
         Route::post('/', [AuthController::class, 'update']);
 
         Route::post('/create', [UserController::class, 'create']);
