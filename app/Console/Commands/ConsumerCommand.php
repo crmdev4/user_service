@@ -56,7 +56,8 @@ class ConsumerCommand extends Command
                                     'expired_at' => Carbon::now()->addDay(1),
                                 ]);
 
-                                $verificationUrl = 'http://auth.rentfms.test/api/users/verification-email-user?token=' . $token;
+                                $verificationUrl = config('apiendpoints.AUTH_API_URL') . '/users/verify-email/' . $token;
+                                \Log::info("Endpoint URL for Email : " . $verificationUrl);
 
                                 /* SendEmployeeVerificationEmailJob::dispatch($data, $verificationUrl); */
                                 Mail::to($data['email'])->send(new VerificationEmail($token, $verificationUrl, $data));
@@ -65,9 +66,9 @@ class ConsumerCommand extends Command
                                 $this->info(" [x] Verification email sent to: " . $data['email']);
                                 break;
                             case 'registration':
-                                Mail::to($data['email'])->send(new WelcomeEmail($data));
-                                Log::info(" [x] Welcome email sent to: " . $data['email']);
-                                $this->info(" [x] Welcome email sent to: " . $data['email']);
+                                // Mail::to($data['email'])->send(new WelcomeEmail($data));
+                                Log::info(" [x] Welcome email sent");
+                                $this->info(" [x] Welcome email sent");
                                 break;
                             default:
                                 $this->warn(" [x] Unknown message type: " . $data['type']);

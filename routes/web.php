@@ -7,7 +7,8 @@ use App\Http\Controllers\Web\RelayController;
 use App\Http\Controllers\API\EmployeeVerificationController;
 
 Route::get('/', function () {
-    return response()->json(['message' => 'OKE'], 200); });
+    return response()->json(['message' => 'OKE'], 200);
+});
 
 Route::prefix('/dashboard/relay')->group(function () {
     Route::get('/list', [RelayController::class, 'index']);
@@ -19,4 +20,3 @@ Route::get('/verify-email/{token}', [EmployeeVerificationController::class, 'ver
 
 Route::get('/forgot-password/{token}', [EmailForgotPasswordController::class, 'verify'])->name('verify.email-forgot-password');
 Route::get('/verify-user-email', [UserVerificationController::class, 'verifyUser'])->name('verify.user.email');
-

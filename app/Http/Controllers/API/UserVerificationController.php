@@ -7,6 +7,7 @@ use App\Models\EmailUserVerification;
 use App\Models\EmailVerification;
 use App\Models\UserAccount;
 use App\Traits\ApiResponseTrait;
+use App\Helpers\RabbitMq;
 use Cache;
 use Carbon\Carbon;
 use Http;
@@ -238,6 +239,38 @@ class UserVerificationController extends Controller
                 404,
                 'User not found'
             );
+        }
+    }
+
+    // verify token received from email
+    public function verify(Request $request, $token)
+    {
+        $verification = EmailVerification::where('token', $token)->first();
+
+        if ($verification) {
+            if ($verification->expired_at < Carbon::now()) {
+                \Log::info("Verification token: " . $token);
+                \Log::info("Token has expired");
+                return redirect()->to(config('app.frontend_url') . '/verify-email?status=error&message=Token has expired');
+            } else {
+                // change leads status in leads service through rabbitMq
+                \Log::info("Verification token: " . $token);
+                \Log::info("Verification Data : " . json_encode($verification));
+
+                // send to message broker (RabbitMQ, PORT:5672)
+                $data = [
+                    'type' => 'registration',
+                    'lead_id' => $verification->employee_id,
+                    'company_id' => $verification->company_id,
+                ];
+                \Log::info("Data to send to RabbitMQ : " . json_encode($data));
+
+                RabbitMq::sendToRabbitMq(json_encode($data), 'user_registration');
+
+                // delete token
+                $verification->delete();
+                return redirect()->to(config('app.frontend_url') . '/auth/signup');
+            }
         }
     }
 }

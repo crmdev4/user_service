@@ -17,4 +17,7 @@ return [
 
     'DEV_S3_URL' => env('DEV_S3_URL', 'https://apis3.rentfms.com'),
     'PRODUCTION_S3_URL' => env('PRODUCTION_S3_URL', 'https://apis3.rentfms.com'),
+
+    'AUTH_API_URL' => env('API_AUTH_URL', 'http://localhost.auth:9999'),
+    'FRONTEND_URL' => env('FRONTEND_URL', 'http://localhost:3000'),
 ];
