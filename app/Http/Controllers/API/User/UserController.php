@@ -13,6 +13,7 @@ use App\Models\Role;
 use App\Models\UserAccount;
 use App\Models\Account;
 use Validator;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -62,8 +63,8 @@ class UserController extends Controller
                         ->leftJoin('accounts', 'user_accounts.account_id', '=', 'accounts.id')
                         ->leftJoin('users', 'user_accounts.user_id', '=', 'users.id');
 
-        $query = $query->where('user_accounts.secondary_id', $company_id)
-            ->whereNotNull('user_accounts.host');
+        $query = $query->where('user_accounts.secondary_id', $company_id);
+            //->whereNotNull('user_accounts.host');
 
         // Apply search
         if (!empty($search)) {
@@ -101,6 +102,7 @@ class UserController extends Controller
             'name' => 'required|string',
             'phone' => 'required|string',
             'role' => 'required|string',
+            'password' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -147,7 +149,7 @@ class UserController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'username' => $request->email,
-                'password' => '',
+                'password' => Hash::make($request->password),
                 'phone' => $request->phone,
                 'is_active' => 1,
                 'banned' => $request->is_banned,
@@ -197,15 +199,16 @@ class UserController extends Controller
             }
             $query->is_activated = 1;
             $query->is_banned = $request->is_banned;
-            $query->secondary_id = $request->company_id;
+            $query->secondary_id = $userHost->secondary_id;
 
             $query->save();
             $result = $query->refresh();
 
             if (isset($user->getRoleNames()[0])) {
                 $user->removeRole($user->getRoleNames()[0]);
+                $user->assignRole($request->role);
             }
-            $user->assignRole($request->role);
+            
 
             DB::commit();
 
@@ -336,7 +339,7 @@ class UserController extends Controller
     public function show($id)
     {
         //return $this->service->getData($id);
-        $account = UserAccount::where('user_id', $id);
+        $account = UserAccount::where('user_accounts.id', $id);
         $account = $account->select(
             'user_accounts.secondary_id as secondary_id',
             'user_accounts.id as user_account_id',
@@ -398,26 +401,30 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-
-        $query = User::find($id);
+        $account = UserAccount::where('id', $id)->first();
+        $query = User::find($account->user_id);
         if (!$query) {
             return $this->failedResponse(null, 'User not found, please use valid account id', 404);
         }
+        
         DB::beginTransaction();
         try {
             $query->name = $request->name;
             $query->phone = $request->phone;
             $query->email = $request->email;
+            if($request->password){
+                $query->password = Hash::make($request->password);
+            };
             $query->save();
             $query = $query->refresh();
 
-            if($request->role){
-                $role  = Role::find($request->role);
-                if (isset($query->getRoleNames()[0])) {
-                    $query->removeRole($query->getRoleNames()[0]);
-                }
-                $query->assignRole($role->name);
-            }
+            // if($request->role){
+            //     $role  = Role::find($request->role);
+            //     if (isset($query->getRoleNames()[0])) {
+            //         $query->removeRole($query->getRoleNames()[0]);
+            //     }
+            //     $query->assignRole($role->name);
+            // }
 
             DB::commit();
 
@@ -473,6 +480,44 @@ class UserController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
+            return $this->failedResponse(null, $e->getMessage(), 203);
+        }
+    }
+
+    public function delete(Request $request, $id)
+    {
+
+        $accountType = $request->header('x-account-type');
+        if (empty($accountType)) {
+            return $this->failedResponse(null, 'Account type is required');
+        }
+        $account = Account::where('account', $accountType)->first();
+
+        try {
+
+        $query = UserAccount::where('id', $id)->where('account_id', $account->id)->first();
+        if (!$query) {
+            return $this->failedResponse(null, 'User not found, please use valid account id', 404);
+        }
+            
+        $user = User::where('id', $query->user_id)->first();
+
+       
+            activity('Delete User Account')
+                ->causedBy($user)
+                ->performedOn($user)
+                ->log('Delete user account ' . $query->is_banned . 'to' . $request->banned);
+
+            $user->delete();
+            $query->delete();
+    
+            return $this->successResponse(
+                '',
+                'User delete success',
+                200
+            );
+        } catch (\Exception $e) {
+             
             return $this->failedResponse(null, $e->getMessage(), 203);
         }
     }

@@ -80,6 +80,7 @@ Route::middleware('auth:api')->group(function () {
 
         Route::post('/create', [UserController::class, 'create']);
         Route::get('/list', [UserController::class, 'users']);
+        Route::delete('/{id}', [UserController::class, 'delete']);
         Route::get('/{id}', [UserController::class, 'show']);
         Route::patch('/{id}', [UserController::class, 'update']);
         Route::patch('/banned/{id}', [UserController::class, 'banned']);
