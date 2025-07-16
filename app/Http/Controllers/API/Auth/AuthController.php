@@ -422,6 +422,12 @@ class AuthController extends BaseController
                 $success['secondary_id'] = $account->where('account', $accountType)->select('secondary_id')->first()['secondary_id'];
                 $success['user_id'] = $user->id;
 
+                if (!isset($success['role'])) {
+                    // Tambahkan role jika belum ada (untuk account type lain)
+                    $userRolesAndPermissions = $this->getUserRolesAndPermissions($user);
+                    $success['role'] = $userRolesAndPermissions['role'];
+                }
+
                 if ($accountType == 'fms_driver') {
                     $employeeId = UserAccount::where('user_id', $user->id)->where('account', 'fms_driver')->leftJoin('accounts', 'user_accounts.account_id', '=', 'accounts.id')->first();
                     $success['employee_id'] = $employeeId->secondary_id;
