@@ -419,11 +419,7 @@ class UserController extends Controller
             $query = $query->refresh();
 
             if($request->role){
-                $role  = Role::find($request->role);
-                if (isset($query->getRoleNames()[0])) {
-                    $query->removeRole($query->getRoleNames()[0]);
-                }
-                $query->assignRole($role->name);
+                $query->syncRoles([$request->role]);
             }
 
             DB::commit();
