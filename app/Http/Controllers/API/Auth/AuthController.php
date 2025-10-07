@@ -282,6 +282,9 @@ class AuthController extends BaseController
             if ($request->secondary_id) {
                 $query->secondary_id = $request->secondary_id;
             }
+            if ($request->supplier_id) {
+                $query->supplier_id = $request->supplier_id;
+            }
             if ($request->host) {
                 $query->host = $host;
                 // $query->host = $request->host;
@@ -381,6 +384,7 @@ class AuthController extends BaseController
             $account = UserAccount::where('user_id', $user->id);
             $account = $account->select(
                 'user_accounts.secondary_id as secondary_id',
+                'user_accounts.supplier_id as supplier_id',
                 'user_accounts.id as user_account_id',
                 'user_accounts.user_id',
                 'user_accounts.account_id',
@@ -419,8 +423,15 @@ class AuthController extends BaseController
                 $success['token'] = $user->createToken('authToken', $itemsArray)->accessToken;
                 $success['name'] = $user->name;
                 $success['account'] = $itemsArray;
-                $success['secondary_id'] = $account->where('account', $accountType)->select('secondary_id')->first()['secondary_id'];
+                
+                $currentAccount = $account->where('account', $accountType)->first();
+                $success['secondary_id'] = $currentAccount['secondary_id'];
                 $success['user_id'] = $user->id;
+
+                // Tambahkan supplier_id jika tidak null
+                if (!empty($currentAccount['supplier_id'])) {
+                    $success['supplier_id'] = $currentAccount['supplier_id'];
+                }
 
                 if (!isset($success['role'])) {
                     // Tambahkan role jika belum ada (untuk account type lain)
@@ -474,6 +485,7 @@ class AuthController extends BaseController
         $account = UserAccount::where('user_id', $user->id);
         $account = $account->select(
             'user_accounts.secondary_id as secondary_id',
+            'user_accounts.supplier_id as supplier_id',
             'user_accounts.id as user_account_id',
             'user_accounts.user_id',
             'user_accounts.account_id',
@@ -492,6 +504,12 @@ class AuthController extends BaseController
             // Success array
             $user->role = $userRolesAndPermissions['role'];
             $user->permission = $userRolesAndPermissions['permission'];
+            
+            // Tambahkan supplier_id jika tidak null
+            $accountWithSupplier = $account->first();
+            if (!empty($accountWithSupplier['supplier_id'])) {
+                $user->supplier_id = $accountWithSupplier['supplier_id'];
+            }
 
             return $this->successResponse($user, 'User data found.');
         }

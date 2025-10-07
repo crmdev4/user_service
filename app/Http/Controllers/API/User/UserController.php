@@ -48,6 +48,7 @@ class UserController extends Controller
         // Base query
         $query = UserAccount::select(
                             'user_accounts.secondary_id as secondary_id',
+                            'user_accounts.supplier_id as supplier_id',
                             'user_accounts.id as id',
                             'user_accounts.user_id',
                             'user_accounts.account_id',
@@ -200,6 +201,9 @@ class UserController extends Controller
             $query->is_activated = 1;
             $query->is_banned = $request->is_banned;
             $query->secondary_id = $userHost->secondary_id;
+            if ($request->supplier_id) {
+                $query->supplier_id = $request->supplier_id;
+            }
 
             $query->save();
             $result = $query->refresh();
@@ -342,6 +346,7 @@ class UserController extends Controller
         $account = UserAccount::where('user_accounts.id', $id);
         $account = $account->select(
             'user_accounts.secondary_id as secondary_id',
+            'user_accounts.supplier_id as supplier_id',
             'user_accounts.id as user_account_id',
             'user_accounts.user_id',
             'user_accounts.account_id',

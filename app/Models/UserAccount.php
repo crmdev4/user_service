@@ -42,6 +42,7 @@ class UserAccount extends Model
         'user_id',
         'account_id',
         'secondary_id',
+        'supplier_id',
         'is_activated',
     ];
 
