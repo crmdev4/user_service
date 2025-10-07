@@ -428,10 +428,8 @@ class AuthController extends BaseController
                 $success['secondary_id'] = $currentAccount['secondary_id'];
                 $success['user_id'] = $user->id;
 
-                // Tambahkan supplier_id jika tidak null
-                if (!empty($currentAccount['supplier_id'])) {
-                    $success['supplier_id'] = $currentAccount['supplier_id'];
-                }
+                // Always include supplier_id (can be null)
+                $success['supplier_id'] = $currentAccount['supplier_id'] ?? null;
 
                 if (!isset($success['role'])) {
                     // Tambahkan role jika belum ada (untuk account type lain)
@@ -505,11 +503,9 @@ class AuthController extends BaseController
             $user->role = $userRolesAndPermissions['role'];
             $user->permission = $userRolesAndPermissions['permission'];
             
-            // Tambahkan supplier_id jika tidak null
+            // Always include supplier_id (can be null)
             $accountWithSupplier = $account->first();
-            if (!empty($accountWithSupplier['supplier_id'])) {
-                $user->supplier_id = $accountWithSupplier['supplier_id'];
-            }
+            $user->supplier_id = $accountWithSupplier['supplier_id'] ?? null;
 
             return $this->successResponse($user, 'User data found.');
         }

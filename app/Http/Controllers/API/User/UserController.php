@@ -208,11 +208,15 @@ class UserController extends Controller
             $query->save();
             $result = $query->refresh();
 
-            if (isset($user->getRoleNames()[0])) {
-                $user->removeRole($user->getRoleNames()[0]);
+            // Assign role
+            if ($request->role) {
+                // Remove existing roles first
+                if (isset($user->getRoleNames()[0])) {
+                    $user->removeRole($user->getRoleNames()[0]);
+                }
+                // Assign new role
                 $user->assignRole($request->role);
             }
-            
 
             DB::commit();
 
@@ -425,6 +429,12 @@ class UserController extends Controller
 
             if($request->role){
                 $query->syncRoles([$request->role]);
+            }
+
+            // Update supplier_id di user_accounts
+            if ($request->has('supplier_id')) {
+                $account->supplier_id = $request->supplier_id;
+                $account->save();
             }
 
             DB::commit();
