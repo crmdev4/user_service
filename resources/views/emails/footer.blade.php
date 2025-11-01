@@ -65,14 +65,12 @@
                 <tr>
                     <td style="font-family:'Poppins','Helvetica','Arial',sans-serif">
                         <h5 style="font-weight:400;margin-top:20px;">
-                            Copyright © 2023 duluin.com, All rights
+                            Copyright © 2025 rentfms.com, All rights
                             reserved.<br>
                             Kamu mendapatkan email ini karena telah terdaftar sebagai pengguna sistem
-                            Duluin.com<br><br>
+                            Rentfms<br><br>
 
-                            <strong>PT. Rasa Aksata Nusantara.</strong><br>
-                            Gading Kirana Timur A11/15, Kelapa Gading Barat, KelapaGading. JakartaUtara, Jakarta, 14240
-                            Indonesia
+                           
                         </h5>
                     </td>
                 </tr>

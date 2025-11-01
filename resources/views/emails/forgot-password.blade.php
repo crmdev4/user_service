@@ -12,13 +12,11 @@
                 <p>Silakan klik tautan di bawah ini untuk memverifikasi alamat email Anda dan mengatur ulang kata sandi
                     Anda.</p>
                 <a style="background-color:#fa5d48;padding:8px 13px;color:white;text-decoration:none;border-radius:5px;margin-top:10px;"
-                    href="{{ $url }}">Reset Password</a>
+                    href="{{ $data['url'] }}">Klik Disini !</a>
                 <hr style="margin-top:24px;border:0;border-bottom:1px solid #c1c7d0">
                 <p>Link ini akan kadaluarsa dalam 1 jam. Jika Anda tidak mengatur ulang kata sandi Anda dalam waktu
                     tersebut, Anda dapat meminta ulang.</p>
-                <p>Jika Anda memiliki pertanyaan atau membutuhkan bantuan, jangan ragu untuk menghubungi tim dukungan
-                    kami di no wa duluin
-                </p>
+                
                 <p>Terima kasih.</p>
             </td>
         </tr>

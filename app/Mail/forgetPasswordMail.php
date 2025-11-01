@@ -8,53 +8,56 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class forgetPasswordMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $verificationUrl;
+    public $data;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct($verificationUrl)
+    public function __construct($data)
     {
-        $this->verificationUrl = $verificationUrl;
-        // $this->user = $user;
+        $this->data = $data;
     }
 
     /**
      * Get the message envelope.
+     *
+     * @return \Illuminate\Mail\Mailables\Envelope
      */
-    public function envelope(): Envelope
+    public function envelope()
     {
+        // Log::info("Judul : " . $this->data['title']);
         return new Envelope(
-            subject: 'Forget Password Mail',
+            subject: $this->data['title']
         );
     }
 
     /**
      * Get the message content definition.
+     *
+     * @return \Illuminate\Mail\Mailables\Content
      */
-    public function content(): Content
+    public function content()
     {
         return new Content(
-            view: 'emails.forgot-password',
-            with: [
-                'url' => $this->verificationUrl,
-                // 'user' => $this->user,
-            ],
+            view: $this->data['view']
         );
     }
 
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array
      */
-    public function attachments(): array
+    public function attachments()
     {
+        if (isset($this->data['file']) && file_exists($this->data['file'])) {
+            return [
+                Attachment::fromPath($this->data['file']),
+            ];
+        }
         return [];
     }
 }

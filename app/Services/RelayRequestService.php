@@ -330,10 +330,14 @@ class RelayRequestService extends BaseService
         if ($request->hasHeader('Content-Type')) {
             $options['headers']['Content-Type'] = $request->header('Content-Type');
         }
-
-        if ($apiKey) {
-            $options['headers']['Authorization'] = 'Bearer ' . $apiKey;
+        //get the API key from the request header
+        if ($request->hasHeader('Authorization')) {
+            $options['headers']['Authorization'] = $request->header('Authorization');
         }
+
+        // if ($apiKey) {
+        //     $options['headers']['Authorization'] = 'Bearer ' . $apiKey;
+        // }
 
         $query = $request->getQueryString();
         if ($query) {

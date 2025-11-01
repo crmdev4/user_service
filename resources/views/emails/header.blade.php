@@ -9,8 +9,8 @@
                         <tbody>
                             <tr style="text-align:center">
                                 <td style="padding:25px 0">
-                                    <img alt="" height="50" src="https://duluin.com/img/logo/logo-duluin.png"
-                                        class="CToWUd" data-bit="iit">
+                                    <!-- <img alt="" height="50" src="https://duluin.com/img/logo/logo-duluin.png"
+                                        class="CToWUd" data-bit="iit"> -->
                                 </td>
                             </tr>
                             <tr>

@@ -17,6 +17,7 @@ use URL;
 use Validator;
 use Auth;
 use App\Models\User;
+use App\Jobs\SendUserEmailJob;
 
 class EmailForgotPasswordController extends Controller
 {
@@ -46,16 +47,16 @@ class EmailForgotPasswordController extends Controller
 
         $token = Str::random(60);
         $expiration = Carbon::now()->addMinutes(60);
-        $recentRequest = EmailForgotPassword::where('user_id', $user->id)
-            ->where('created_at', '>=', Carbon::now()->subMinutes(15))
-            ->first();
+        // $recentRequest = EmailForgotPassword::where('user_id', $user->id)
+        //     ->where('created_at', '>=', Carbon::now()->subMinutes(1))
+        //     ->first();
 
-        if ($recentRequest) {
-            return response()->json([
-                'success' => false,
-                'message' => 'A password reset request has been made. Please wait 15 minutes before making a new request.',
-            ], 429);
-        }
+        // if ($recentRequest) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'A password reset request has been made. Please wait 15 minutes before making a new request.',
+        //     ], 429);
+        // }
 
         if ($accountType == 'fms_company') {
             $userAccount = UserAccount::where('user_id', $user->id)
@@ -64,51 +65,22 @@ class EmailForgotPasswordController extends Controller
                 })->first();
 
                 // Jika forwardedHost tidak sesuai dengan host di UserAccount
-                if ($userAccount->host === $forwardedHost) {
-                    $host = $userAccount->host;
-                } else {
+                if (!$userAccount) {
                     return $this->failedResponse(null, 'Email not found');
                 }
+
+                $host = 'https://dashboard.rentfms.com';
 
         } else if ($accountType == 'fms_driver') {
             $userAccount = UserAccount::where('user_id', $user->id)
                 ->whereHas('account', function ($query) use ($user) {
                     $query->where('account', 'fms_driver');
                 })->first();
-            if ($userAccount) {
-                $headers = [
-                    'accept' => 'application/json',
-                    'Authorization' => 'Bearer ' . config('apiendpoints.LOCAL_API_DRIVER_KEY')
-                ];
 
-                try{
-                    $responseDataDriver = Http::withHeaders($headers)->get(config('apiendpoints.LOCAL_API_DRIVER') . '/api/v1/drivers/' . $userAccount->secondary_id);
-                }catch (\Exception $err){
-                     
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Service driver offline",
-                    ], 500);
-                };
-
-                $dataDriver = $responseDataDriver->json();
-                if ($dataDriver['success']) {
-                    $company_id = $dataDriver['data']['company_id'];
-                    
-                    $userAccount = UserAccount::where('secondary_id', $company_id)
-                            ->whereHas('account', function ($query) use ($user) {
-                                $query->where('account', 'fms_company');
-                            })->first();
-
-                    
-                    $host = $userAccount->host ?? url("/");
-                   
-                } else {
-                    return $this->failedResponse(null, $dataDriver['message']);
+                if (!$userAccount) { 
+                    return $this->failedResponse(null, 'Account not found');
                 }
-            } else {
-                return $this->failedResponse(null, 'Account not found');
-            }
+                $host = 'https://app.rentfms.com';
         } else {
             return $this->failedResponse(null, 'Account type not match');
         }
@@ -121,15 +93,17 @@ class EmailForgotPasswordController extends Controller
             'expired_at' => $expiration,
         ]);
 
+        $data = [
+            'title' => 'Reset Password Akun',
+            'name' => $user->name,
+            'to' => $user->email,
+            'url' => $host . "/recovery_password/" . $token,
+            'view' => 'emails.forgot-password',
+        ];
 
-        $response = Http::timeout(30)->post(config("apiendpoints.LOCAL_API_NOTIFICATION") . '/api/v1/email/send', [
-            'email' => $request->email,
-            'action' => "FORGOT_PASSWORD",
-            'data' => [
-                'full_name' => $user->name,
-                'url_verification' => $host . "/recovery_password/" . $token
-            ]
-        ]);
+        //create send email
+        SendUserEmailJob::dispatch($data)
+            ->onQueue('email-user');
 
 
         return response()->json([
@@ -191,19 +165,25 @@ class EmailForgotPasswordController extends Controller
 
     public function recoveryPassword(Request $request)
     {
-        // $validator = Validator::make($request->all(), [
-        //     'token' => 'required',
-        //     'password' => 'required|min:6|confirmed',
-        // ]);
 
-        // if ($validator->fails()) {
-        //     return $this->failedResponse(null, $validator->errors()->first());
-        // }
+        $accountType = $request->header('x-account-type');
+
+        if (empty($accountType)) {
+            return $this->failedResponse(null, 'Account type is required');
+        }
 
         $request->validate([
             'token' => 'required',
             'password' => 'required|min:6|confirmed',
         ]);
+
+        if ($accountType == 'fms_company') {
+            $host = 'https://dashboard.rentfms.com';
+        } else if ($accountType == 'fms_driver') {
+            $host = 'https://app.rentfms.com';
+        } else {
+            return $this->failedResponse(null, 'Account type not match');
+        }
 
 
         $token = $request->token;
@@ -217,52 +197,16 @@ class EmailForgotPasswordController extends Controller
         }
 
         $user = User::find($verification->user_id);
-
-        $userAccount = UserAccount::where('user_id', $user->id)->first();
-
-        // cek apakah dia user company
-        if ($userAccount->account->account == 'hris_company' && $userAccount->host) {
-            $host = $userAccount->host;
-        } else {
-            $headers = [
-                'accept' => 'application/json',
-                'Authorization' => 'Bearer ' . config('apiendpoints.LOCAL_API_EMPLOYEES_KEY')
-            ];
-
-            $dataDriver = Http::withHeaders($headers)->get(config('apiendpoints.LOCAL_API_EMPLOYEES') . '/api/v1/employee/' . $userAccount->secondary_id);
-            $dataDriver = $dataDriver->json();
-            if ($dataDriver['success']) {
-                $company_id = $dataDriver['data']['company_id'];
-                $parent_company = isset($dataDriver['data']['parent_company']) ? $dataDriver['data']['parent_company'] : null;
-                if ($parent_company != "" && $parent_company != null) {
-                    $userAccount = UserAccount::where('secondary_id', $parent_company)
-                        ->whereHas('account', function ($query) use ($user) {
-                            $query->where('account', 'hris_company');
-                        })->first();
-                } else {
-                    $userAccount = UserAccount::where('secondary_id', $company_id)
-                        ->whereHas('account', function ($query) use ($user) {
-                            $query->where('account', 'hris_company');
-                        })->first();
-                }
-                if ($userAccount) {
-                    $host = $userAccount->host . '/password-recovery-success';
-                } else {
-                    return $this->failedResponse(null, 'Host not found');
-                }
-            } else {
-                return $this->failedResponse(null, $dataDriver['message']);
-            }
-        }
-
+        
         if ($user) {
             $user->password = Hash::make($request->password);
             $user->save();
             $verification->delete();
             return $this->successResponse(
                 [
-                    'redirect' => $host,
-                    'user' => $user
+                    'user' => $user,
+                    'redirect' => $host . "/signin"
+
                 ],
                 'Successfully changed the password.'
             );
