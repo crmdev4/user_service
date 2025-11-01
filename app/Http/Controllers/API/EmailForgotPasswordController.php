@@ -97,7 +97,7 @@ class EmailForgotPasswordController extends Controller
             'title' => 'Reset Password Akun',
             'name' => $user->name,
             'to' => $user->email,
-            'url' => $host . "/recovery_password/" . $token,
+            'url' => $host . "/auth/recovery_password/" . $token,
             'view' => 'emails.forgot-password',
         ];
 
