@@ -48,8 +48,17 @@ class ImportEmployeesJob implements ShouldQueue
                 Log::error('Failed to send employee data: ' . $response->body());
             }
         }
-        $progress = ($this->batchNumber / $this->totalBatches) * 100;
-        // Redis::set("import_progress_{$this->importKey}", $progress);
+        // Get total batches from cache (may still be incrementing)
+        $totalBatches = Cache::get("import_employee_total_batches_{$this->importKey}", $this->totalBatches);
+        
+        // Calculate progress, but don't exceed 100% until all batches are done
+        $progress = min(($this->batchNumber / max($totalBatches, $this->totalBatches)) * 100, 99);
+        
+        // If this is the last known batch and total matches, set to 100%
+        if ($this->batchNumber >= $totalBatches && $this->batchNumber == $this->totalBatches) {
+            $progress = 100;
+        }
+        
         Cache::put("import_employee_progress_{$this->importKey}", $progress);
     }
 }

@@ -89,6 +89,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::post('/employees/import', [EmployeeImportController::class, 'importEmployees']);
     Route::get('/employees/import/progress/{importKey}', [EmployeeImportController::class, 'getImportProgress']);
+    Route::post('/employees/import/clear-cache', [EmployeeImportController::class, 'clearImportCache']);
 
     Route::post('/change_password', [AuthController::class, 'change_password']);
     Route::post('/reset_password', [AuthController::class, 'resetPassword']);
