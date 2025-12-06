@@ -124,7 +124,7 @@ class AuthController extends BaseController
             return $this->failedResponse(null, json_encode($validator->errors()), 400, json_encode($validator->errors()));
         }
         
-        $accountType = "fms_driver";
+        $accountType = "crm_user";
 
         $account = Account::where('account', $accountType)->first();
 
@@ -403,7 +403,7 @@ class AuthController extends BaseController
             } 
 
             if (in_array($accountType, $itemsArray)) {
-                if ($accountType == 'fms_company' && !empty($forwardedHost)) {
+                if ($accountType == 'crm_company' && !empty($forwardedHost)) {
                     $userAccount = UserAccount::where('user_id', $user->id)->first();
                     if (!in_array($forwardedHost, $grantHost)) {
                         if ($userAccount->host != $forwardedHost) {
@@ -437,8 +437,8 @@ class AuthController extends BaseController
                     $success['role'] = $userRolesAndPermissions['role'];
                 }
 
-                if ($accountType == 'fms_driver') {
-                    $employeeId = UserAccount::where('user_id', $user->id)->where('account', 'fms_driver')->leftJoin('accounts', 'user_accounts.account_id', '=', 'accounts.id')->first();
+                if ($accountType == 'crm_user') {
+                    $employeeId = UserAccount::where('user_id', $user->id)->where('account', 'crm_user')->leftJoin('accounts', 'user_accounts.account_id', '=', 'accounts.id')->first();
                     $success['employee_id'] = $employeeId->secondary_id;
                 }
 
@@ -569,7 +569,7 @@ class AuthController extends BaseController
             $data = $response->json();
             $employeeData = $data['data'];
             if ($employeeData['is_verified']) {
-                $account = Account::where('account', 'fms_driver')->first();
+                $account = Account::where('account', 'crm_user')->first();
 
                 if (empty($account)) {
                     return $this->failedResponse(null, 'Registrasi tidak dapat diproses', 203);
@@ -599,7 +599,7 @@ class AuthController extends BaseController
                         ]);
                     }
 
-                    $checkAccount = $this->checkAccount($user, 'fms_driver');
+                    $checkAccount = $this->checkAccount($user, 'crm_user');
                     \Log::info("Check Account : ");
                     \Log::info($checkAccount);
                     if ($checkAccount == true) {
@@ -637,7 +637,7 @@ class AuthController extends BaseController
                         ->leftJoin('accounts', 'user_accounts.account_id', '=', 'accounts.id');
 
                     $itemsArray = $account->pluck('account')->toArray();
-                    $accountData = Account::select('is_single_device')->where('account', 'fms_driver')->first();
+                    $accountData = Account::select('is_single_device')->where('account', 'crm_user')->first();
 
                     // Delete any existing tokens if single device login is enforced
                     if ($accountData->is_single_device) {
@@ -649,7 +649,7 @@ class AuthController extends BaseController
                     $success['token'] = $user->createToken('authToken', $itemsArray)->accessToken;
                     $success['name'] = $user->name;
                     $success['account'] = $itemsArray;
-                    $success['secondary_id'] = $account->where('account', 'fms_driver')->pluck('secondary_id')->toArray();
+                    $success['secondary_id'] = $account->where('account', 'crm_user')->pluck('secondary_id')->toArray();
                     $success['user_id'] = $user->id;
                     $success['employee_id'] = $employeeData['id'];
 

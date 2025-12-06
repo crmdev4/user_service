@@ -15,12 +15,12 @@ class AccountSeeder extends Seeder
     {
         $accounts = [
             [
-                'account' => 'fms_driver',
+                'account' => 'crm_user',
                 'is_single_device' => 1,
                 'is_banned' => 0,
             ],
             [
-                'account' => 'fms_company',
+                'account' => 'crm_company',
                 'is_single_device' => 1,
                 'is_banned' => 0,
             ],
