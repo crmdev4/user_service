@@ -28,9 +28,8 @@ class AppServiceProvider extends ServiceProvider
         // }
 
         Passport::tokensCan([
-            'fms_company' => 'fms company',
-            'fms_driver' => 'fms driver',
-            
+            'crm_company' => 'crm company',
+            'crm_user' => 'crm user',
         ]);
     }
 }
